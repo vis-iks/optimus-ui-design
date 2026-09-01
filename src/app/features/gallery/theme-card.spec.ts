@@ -13,7 +13,10 @@ function theme(overrides: Partial<MarketplaceTheme> = {}): MarketplaceTheme {
     name: 'Ocean',
     description: 'Cool blues',
     base_preset: 'Aura',
-    preset: { primitive: { blue: { 500: '#3b82f6', 700: '#1d4ed8' } } },
+    preset: {
+      primitive: { blue: { 500: '#3b82f6', 700: '#1d4ed8' } },
+      semantic: { colorScheme: { light: { primary: { color: '{blue.500}' } } } },
+    },
     config: { fontSize: '14px', fontFamily: 'Inter var' },
     author: { github_login: 'octocat', avatar_url: 'https://avatars/octo.png' },
     parent_id: null,
@@ -49,10 +52,12 @@ describe('ThemeCard', () => {
     expect(el.querySelector('.author')?.textContent).toContain('octocat');
   });
 
-  it('renders a swatch strip from the preset colors', () => {
-    const swatches = el.querySelectorAll('.swatch');
-    expect(swatches.length).toBe(2);
-    expect((swatches[0] as HTMLElement).style.background).toBe('rgb(59, 130, 246)');
+  it('renders a theme preview mock-up driven by the preset', () => {
+    const preview = el.querySelector('app-theme-preview .tp') as HTMLElement;
+    expect(preview).toBeTruthy();
+    // `{primary.500}` resolves through the merged Aura base to the preset's blue.
+    expect(preview.style.getPropertyValue('--tp-primary')).toBe('#3b82f6');
+    expect(el.querySelector('.tp-btn--primary')).toBeTruthy();
   });
 
   it('links "Fork & edit" to the designer with the theme id', () => {
