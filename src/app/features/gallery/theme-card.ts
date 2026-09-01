@@ -4,21 +4,20 @@ import { Avatar } from '@openng/optimus-ui/avatar';
 import { Tag } from '@openng/optimus-ui/tag';
 
 import { MarketplaceTheme } from '../../core/marketplace.models';
-import { extractSwatches } from './swatches';
+import { ThemePreview } from './theme-preview';
 
 @Component({
   selector: 'app-theme-card',
   standalone: true,
-  imports: [RouterLink, Avatar, Tag],
+  imports: [RouterLink, Avatar, Tag, ThemePreview],
   template: `
     <article class="card">
-      <div class="swatches" aria-hidden="true">
-        @for (c of swatches(); track $index) {
-          <span class="swatch" [style.background]="c"></span>
-        } @empty {
-          <span class="swatch swatch--empty"></span>
-        }
-      </div>
+      <app-theme-preview
+        class="preview"
+        [preset]="theme().preset"
+        [basePreset]="theme().base_preset"
+        aria-hidden="true"
+      />
 
       <div class="body">
         <header class="head">
@@ -91,15 +90,8 @@ import { extractSwatches } from './swatches';
         border-color: var(--p-primary-color, #6366f1);
         transform: translateY(-2px);
       }
-      .swatches {
-        display: flex;
-        height: 56px;
-      }
-      .swatch {
-        flex: 1;
-      }
-      .swatch--empty {
-        background: var(--p-content-hover-background, #f1f5f9);
+      .preview {
+        display: block;
       }
       .body {
         display: flex;
@@ -210,8 +202,6 @@ import { extractSwatches } from './swatches';
 export class ThemeCard {
   readonly theme = input.required<MarketplaceTheme>();
   readonly report = output<MarketplaceTheme>();
-
-  protected readonly swatches = computed(() => extractSwatches(this.theme().preset));
 
   protected readonly relativeDate = computed(() => {
     const then = new Date(this.theme().created_at).getTime();
