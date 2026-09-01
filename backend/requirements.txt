@@ -1,0 +1,12 @@
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.34,<1.0
+SQLAlchemy>=2.0.36,<2.1
+pydantic>=2.10,<3.0
+pydantic-settings>=2.7,<3.0
+python-jose[cryptography]>=3.3,<4.0
+httpx>=0.28,<0.29
+slowapi>=0.1.9,<0.2
+python-multipart>=0.0.20
+
+# dev / test
+pytest>=8.3,<9.0

@@ -1,0 +1,68 @@
+<div class="designer-layout">
+  <app-header>
+    @if (activeView() === 'editor') {
+      <button
+        (click)="copyShareLink()"
+        class="p-2 rounded-lg hover:bg-[var(--p-content-hover-background)]"
+        [pTooltip]="shareCopied() ? 'Copied!' : 'Copy share link'"
+        tooltipPosition="bottom"
+        aria-label="Copy share link"
+      >
+        <i
+          class="pi"
+          [class.pi-check]="shareCopied()"
+          [class.pi-link]="!shareCopied()"
+          [style.color]="shareCopied() ? 'var(--p-green-500)' : ''"
+        ></i>
+      </button>
+    }
+  </app-header>
+
+  @if (activeView() === 'editor') {
+    <div class="designer-context">
+      <button (click)="backToCreate()" class="designer-back" aria-label="Back to theme selection">
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <h1>{{ themeName() }}</h1>
+    </div>
+  }
+
+  <p-splitter styleClass="designer-splitter" [panelSizes]="[35, 65]" [minSizes]="[20, 30]">
+    <ng-template #panel>
+      <aside class="designer-sidebar">
+        @if (activeView() === 'create') {
+          <design-create-theme />
+        } @else {
+          <div class="designer-editor-area">
+            <design-editor />
+          </div>
+          <div class="designer-footer">
+            <design-editor-footer />
+          </div>
+        }
+      </aside>
+    </ng-template>
+    <ng-template #panel>
+      <main
+        class="designer-preview"
+        [style.--preview-font-family]="previewFontFamily()"
+        [style.--preview-font-size]="previewFontSize()"
+      >
+        @if (activeView() === 'create') {
+          <div class="designer-preview-context" aria-live="polite">
+            <div>
+              <span>Live starter preview</span>
+              <strong>{{ previewThemeName() }} components</strong>
+            </div>
+            <p><i class="pi pi-bolt" aria-hidden="true"></i> Updates as you choose</p>
+          </div>
+        }
+        <app-grid />
+      </main>
+    </ng-template>
+  </p-splitter>
+
+  <footer class="app-footer">
+    Optimus UI Design — independent open-source project.
+  </footer>
+</div>

@@ -1,0 +1,27 @@
+.git
+.github
+.angular
+node_modules
+dist
+out-tsc
+coverage
+
+# backend local artifacts
+backend/.venv
+backend/*.db
+backend/*.db-journal
+backend/.env
+**/__pycache__
+**/*.pyc
+backend/.pytest_cache
+
+# editor / OS
+.vscode
+.idea
+.DS_Store
+*.log
+
+# deployment stuff not needed inside the image
+deploy
+nixpacks.toml
+backend/nixpacks.toml

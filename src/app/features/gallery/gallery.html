@@ -1,0 +1,76 @@
+<app-header />
+
+<main class="wrap">
+  <div class="intro">
+    <div class="intro-copy">
+      <h1>Optimus UI theme marketplace</h1>
+      <p>
+        Browse themes the community has published. Open any one in the designer to tweak it, or
+        build your own from scratch and publish it back.
+      </p>
+    </div>
+    <a routerLink="/designer" class="intro-cta">
+      Open the designer <i class="pi pi-arrow-right" aria-hidden="true"></i>
+    </a>
+  </div>
+
+  <div class="controls">
+    <p-iconfield class="grow">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        type="text"
+        pInputText
+        placeholder="Search themes"
+        class="w-full"
+        [(ngModel)]="searchDraft"
+        (input)="onSearchInput()"
+      />
+    </p-iconfield>
+    <p-select
+      [options]="baseOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="base()"
+      (ngModelChange)="base.set($event); onFilterChange()"
+    />
+    <p-select
+      [options]="sortOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="sort()"
+      (ngModelChange)="sort.set($event); onFilterChange()"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="state"><p-progress-spinner strokeWidth="4" [style]="{ width: '2.5rem', height: '2.5rem' }" /></div>
+  } @else if (failed()) {
+    <div class="state">
+      <p>Could not reach the marketplace.</p>
+      <p-button label="Retry" severity="secondary" (click)="load()" />
+    </div>
+  } @else if (themes().length === 0) {
+    <div class="state">
+      <p>No themes match your filters yet.</p>
+      <a routerLink="/designer" class="p-button p-button-sm">Create the first one</a>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (theme of themes(); track theme.id) {
+        <app-theme-card [theme]="theme" (report)="openReport($event)" />
+      }
+    </div>
+    <p-paginator
+      [first]="first()"
+      [rows]="pageSize"
+      [totalRecords]="total()"
+      (onPageChange)="onPage($event)"
+    />
+  }
+</main>
+
+<app-report-dialog
+  [theme]="reportTarget()"
+  [(visible)]="reportOpen"
+  (reported)="onReported()"
+/>
