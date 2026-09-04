@@ -5,9 +5,13 @@ VENV := backend/.venv
 FRONTEND_DEPS := node_modules/.package-lock.json
 BACKEND_DEPS := $(VENV)/.dependencies-installed
 
+VPS_HOST := codeblend
+VPS_DIR := /opt/apps/optimus-ui-design
+IMAGE_TAG := $(shell git rev-parse HEAD)
+
 .DEFAULT_GOAL := help
 
-.PHONY: help setup frontend api dev test test-frontend test-backend build
+.PHONY: help setup frontend api dev test test-frontend test-backend build deploy
 
 help: ## List the available local-development commands.
 	@awk 'BEGIN {FS = ":.*##"}; /^[a-zA-Z0-9_-]+:.*##/ {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -44,3 +48,12 @@ test-backend: $(BACKEND_DEPS) ## Run FastAPI tests.
 
 build: $(FRONTEND_DEPS) ## Build the production frontend bundle.
 	npm run build
+
+deploy: ## Build the image and release it to the VPS (see deploy/README.md).
+	docker build -t optimus-ui-design:$(IMAGE_TAG) .
+	docker save optimus-ui-design:$(IMAGE_TAG) | gzip -c \
+		| ssh $(VPS_HOST) 'gzip -d | docker load'
+	scp deploy/vps/docker-compose.yml $(VPS_HOST):$(VPS_DIR)/docker-compose.yml
+	ssh $(VPS_HOST) "cd $(VPS_DIR) \
+		&& sed -i 's|^OPTIMUS_IMAGE_TAG=.*|OPTIMUS_IMAGE_TAG=$(IMAGE_TAG)|' .env \
+		&& docker compose up -d --remove-orphans && docker compose ps"
