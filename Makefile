@@ -5,7 +5,8 @@ VENV := backend/.venv
 FRONTEND_DEPS := node_modules/.package-lock.json
 BACKEND_DEPS := $(VENV)/.dependencies-installed
 
-VPS_HOST := codeblend
+-include deploy/host.env
+
 VPS_DIR := /opt/apps/optimus-ui-design
 IMAGE_TAG := $(shell git rev-parse HEAD)
 
@@ -50,6 +51,7 @@ build: $(FRONTEND_DEPS) ## Build the production frontend bundle.
 	npm run build
 
 deploy: ## Build the image and release it to the VPS (see deploy/README.md).
+	@test -n "$(VPS_HOST)" || { echo "Set VPS_HOST in deploy/host.env (see deploy/host.env.example)"; exit 1; }
 	docker build -t optimus-ui-design:$(IMAGE_TAG) .
 	docker save optimus-ui-design:$(IMAGE_TAG) | gzip -c \
 		| ssh $(VPS_HOST) 'gzip -d | docker load'
