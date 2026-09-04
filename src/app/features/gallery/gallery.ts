@@ -10,10 +10,10 @@ import { ProgressSpinner } from '@openng/optimus-ui/progressspinner';
 import { Select } from '@openng/optimus-ui/select';
 
 import { AppHeader } from '../../core/app-header';
-import { AuthService } from '../../core/auth.service';
 import { MarketplaceService } from '../../core/marketplace.service';
 import { BasePreset, MarketplaceTheme } from '../../core/marketplace.models';
-import { ReportDialog } from './report-dialog';
+import { Grid } from '../designer/blocks/grid/grid';
+import { ThemeDesignerService } from '../designer/services/theme-designer.service';
 import { ThemeCard } from './theme-card';
 
 const PAGE_SIZE = 24;
@@ -32,7 +32,7 @@ const PAGE_SIZE = 24;
     Paginator,
     ProgressSpinner,
     Select,
-    ReportDialog,
+    Grid,
     ThemeCard,
   ],
   templateUrl: './gallery.html',
@@ -40,10 +40,13 @@ const PAGE_SIZE = 24;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Gallery implements OnInit {
-  protected readonly auth = inject(AuthService);
   private readonly marketplace = inject(MarketplaceService);
+  private readonly designer = inject(ThemeDesignerService);
 
   protected readonly themes = signal<MarketplaceTheme[]>([]);
+  protected readonly selectedTheme = signal<MarketplaceTheme | null>(null);
+  protected readonly previewFontFamily = this.designer.previewFontFamily;
+  protected readonly previewFontSize = this.designer.previewFontSize;
   protected readonly total = signal(0);
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
@@ -54,9 +57,6 @@ export class Gallery implements OnInit {
   protected readonly search = signal('');
   protected readonly sort = signal<'recent' | 'popular'>('recent');
   protected readonly base = signal<BasePreset | 'all'>('all');
-
-  protected readonly reportTarget = signal<MarketplaceTheme | null>(null);
-  protected readonly reportOpen = signal(false);
 
   protected readonly sortOptions = [
     { label: 'Newest', value: 'recent' },
@@ -91,6 +91,10 @@ export class Gallery implements OnInit {
       .subscribe({
         next: (res) => {
           this.themes.set(res.items);
+          const selectedId = this.selectedTheme()?.id;
+          const selected = res.items.find((theme) => theme.id === selectedId) ?? res.items[0] ?? null;
+          this.selectedTheme.set(selected);
+          if (selected) this.previewTheme(selected);
           this.total.set(res.total);
           this.loading.set(false);
         },
@@ -123,17 +127,12 @@ export class Gallery implements OnInit {
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected openReport(theme: MarketplaceTheme): void {
-    if (!this.auth.isLoggedIn()) {
-      this.auth.login('/');
-      return;
-    }
-    this.reportTarget.set(theme);
-    this.reportOpen.set(true);
+  protected selectTheme(theme: MarketplaceTheme): void {
+    this.selectedTheme.set(theme);
+    this.previewTheme(theme);
   }
 
-  protected onReported(): void {
-    // A fresh report may have pushed the theme over the auto-hide threshold.
-    this.load();
+  private previewTheme(theme: MarketplaceTheme): void {
+    this.designer.previewThemeFromPreset(theme.name, theme.preset, theme.config);
   }
 }

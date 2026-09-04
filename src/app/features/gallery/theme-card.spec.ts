@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { provideOptimus } from '@openng/optimus-ui/config';
 import Aura from '@openng/optimus-ui-themes/aura';
 
@@ -37,7 +36,7 @@ describe('ThemeCard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ThemeCard],
-      providers: [provideRouter([]), provideOptimus({ theme: { preset: Aura } })],
+      providers: [provideOptimus({ theme: { preset: Aura } })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ThemeCard);
@@ -46,10 +45,13 @@ describe('ThemeCard', () => {
     el = fixture.nativeElement as HTMLElement;
   });
 
-  it('renders the name, description and author', () => {
-    expect(el.querySelector('.name')?.textContent).toContain('Ocean');
-    expect(el.querySelector('.desc')?.textContent).toContain('Cool blues');
-    expect(el.querySelector('.author')?.textContent).toContain('octocat');
+  it('renders the theme name inside its thumbnail without duplicate card metadata', () => {
+    expect(el.querySelector('.tp-mini header strong')?.textContent).toContain('Ocean');
+    expect(el.querySelector('.card')?.getAttribute('aria-label')).toBe('Ocean');
+    expect(el.querySelector('.name')).toBeFalsy();
+    expect(el.querySelector('.foundation')).toBeFalsy();
+    expect(el.querySelector('.author')).toBeFalsy();
+    expect(el.querySelector('.actions')).toBeFalsy();
   });
 
   it('renders a theme preview mock-up driven by the preset', () => {
@@ -57,56 +59,24 @@ describe('ThemeCard', () => {
     expect(preview).toBeTruthy();
     // `{primary.500}` resolves through the merged Aura base to the preset's blue.
     expect(preview.style.getPropertyValue('--tp-primary')).toBe('#3b82f6');
-    expect(el.querySelector('.tp-btn--primary')).toBeTruthy();
+    expect(el.querySelector('.tp-mini')).toBeTruthy();
   });
 
-  it('links "Fork & edit" to the designer with the theme id', () => {
-    const link = el.querySelector('a.btn--primary') as HTMLAnchorElement;
-    expect(link.textContent).toContain('Fork');
-    expect(link.getAttribute('href')).toBe('/designer?themeId=abc123');
-  });
-
-  it('links the lineage button to the theme detail page', () => {
-    const link = el.querySelector('a.btn[href="/theme/abc123"]');
-    expect(link).toBeTruthy();
-  });
-
-  it('shows a "forked from" link when the theme has a parent', () => {
-    fixture.componentRef.setInput(
-      'theme',
-      theme({
-        parent: {
-          id: 'root1',
-          slug: 'root',
-          name: 'Root Theme',
-          base_preset: 'Aura',
-          author: { github_login: 'alice', avatar_url: 'a.png' },
-          parent_id: null,
-          fork_count: 1,
-          created_at: new Date().toISOString(),
-        },
-      }),
-    );
-    fixture.detectChanges();
-    const link = el.querySelector('a.forked-from') as HTMLAnchorElement;
-    expect(link.textContent).toContain('Root Theme');
-    expect(link.getAttribute('href')).toBe('/theme/root1');
-  });
-
-  it('shows the fork count when there are forks', () => {
-    fixture.componentRef.setInput('theme', theme({ fork_count: 3 }));
-    fixture.detectChanges();
-    expect(el.querySelector('a.fork-link')?.textContent).toContain('3');
-  });
-
-  it('emits report when the flag button is clicked', () => {
+  it('emits selection when the compact card is clicked', () => {
     const spy = vi.fn();
-    fixture.componentInstance.report.subscribe(spy);
-    (el.querySelector('button.btn') as HTMLButtonElement).click();
+    fixture.componentInstance.select.subscribe(spy);
+    (el.querySelector('button.card') as HTMLButtonElement).click();
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({ id: 'abc123' }));
   });
 
-  it('shows "today" for a freshly created theme', () => {
-    expect(el.querySelector('.meta')?.textContent).toContain('today');
+  it('marks the selected card for assistive technology', () => {
+    fixture.componentRef.setInput('selected', true);
+    fixture.detectChanges();
+    expect(el.querySelector('button.card')?.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('keeps its card content minimal', () => {
+    expect(el.querySelector('.forked-from')).toBeFalsy();
+    expect(el.querySelector('.updated')).toBeFalsy();
   });
 });

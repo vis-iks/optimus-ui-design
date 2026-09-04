@@ -63,4 +63,16 @@ describe('AuthService', () => {
     expect(service.token).toBe('fresh-token');
     expect(service.isAdmin()).toBe(true);
   });
+
+  it('uses the local session endpoint in development', async () => {
+    const promise = service.login();
+    http.expectOne(`${API}/api/auth/dev-login`).flush({ token: 'local-token' });
+    await Promise.resolve();
+    http
+      .expectOne(`${API}/api/auth/me`)
+      .flush({ id: 3, github_login: 'local-dev', avatar_url: '/favicon.svg', is_admin: false });
+
+    await promise;
+    expect(service.currentUser()?.github_login).toBe('local-dev');
+  });
 });

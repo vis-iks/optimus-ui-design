@@ -72,6 +72,7 @@ import { BasePreset, ThemeDesignerService } from '../services/theme-designer.ser
               optionLabel="label"
               optionValue="value"
               [(ngModel)]="base"
+              [appendTo]="'body'"
               styleClass="w-full"
             />
           </div>

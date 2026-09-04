@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     github_client_id: str = ""
     github_client_secret: str = ""
     oauth_callback_url: str = "http://localhost:8000/api/auth/github/callback"
+    dev_login_enabled: bool = False
 
     frontend_url: str = "http://localhost:4200"
     frontend_origins: str = "http://localhost:4200"

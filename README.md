@@ -60,6 +60,19 @@ uvicorn app.main:app --reload  # http://localhost:8000/docs
 
 `src/environments/environment.ts` already points `apiUrl` at `http://localhost:8000`.
 
+### Make shortcuts
+
+```bash
+make setup       # install frontend and backend dependencies
+make dev         # run the Angular app and API together (with local sign-in)
+make test        # run both test suites
+make build       # build the production frontend bundle
+```
+
+Use `make help` to see the individual frontend and API commands. `make dev` signs in as a local
+development account, so it does not need GitHub OAuth. Add `backend/.env` from
+`backend/.env.example` when you want to test GitHub sign-in itself.
+
 ### Verification
 
 ```bash

@@ -70,6 +70,15 @@ describe('Gallery', () => {
   it('loads and renders theme cards on init', () => {
     flushList([theme('a', 'Ocean'), theme('b', 'Sunset')]);
     expect(el.querySelectorAll('app-theme-card').length).toBe(2);
+    expect(el.querySelector('.sample-heading')?.textContent).toContain('Ocean');
+  });
+
+  it('updates the live sample when a theme card is selected', () => {
+    flushList([theme('a', 'Ocean'), theme('b', 'Sunset')]);
+    const cards = el.querySelectorAll('app-theme-card');
+    (cards[1].querySelector('button.card') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(el.querySelector('.sample-heading')?.textContent).toContain('Sunset');
   });
 
   it('shows an empty state when there are no themes', () => {

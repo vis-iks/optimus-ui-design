@@ -4,6 +4,8 @@
 // Set this to an absolute origin only if you split the frontend and backend.
 export const environment = {
   production: true,
+  /** Never expose the local development sign-in path in production. */
+  localAuth: false,
   /** Base URL of the marketplace API. Empty = same origin as the SPA. */
   apiUrl: '',
 };

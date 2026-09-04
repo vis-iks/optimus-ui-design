@@ -30,6 +30,16 @@ def test_login_redirects_to_github(client):
     assert resp.status_code == 503
 
 
+def test_dev_login_mints_a_local_session(client, monkeypatch):
+    monkeypatch.setattr(auth_router.settings, "dev_login_enabled", True)
+    resp = client.post("/api/auth/dev-login")
+    assert resp.status_code == 200
+
+    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {resp.json()['token']}"})
+    assert me.status_code == 200
+    assert me.json()["github_login"] == "local-dev"
+
+
 def test_callback_mints_working_session(client, monkeypatch, fake_github):
     from app.routers import auth as ar
 

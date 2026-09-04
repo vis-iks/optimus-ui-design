@@ -14,6 +14,8 @@ from ..services import upsert_user
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
 
+_DEV_USER = {"id": 0, "login": "local-dev", "avatar_url": "/favicon.svg"}
+
 
 def _safe_redirect(target: str | None) -> str:
     """Only allow redirects back to the configured frontend origin."""
@@ -29,6 +31,15 @@ def github_login(redirect: str | None = None):
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "GitHub OAuth is not configured")
     state = mint_state_token(_safe_redirect(redirect), secrets.token_urlsafe(16))
     return RedirectResponse(build_authorize_url(state), status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+
+@router.post("/dev-login")
+def dev_login(db: Session = Depends(get_db)):
+    """Mint a local session without an OAuth provider when explicitly enabled."""
+    if not settings.dev_login_enabled:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+    user = upsert_user(db, _DEV_USER)
+    return {"token": mint_session_token(user)}
 
 
 @router.get("/github/callback")

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { ThemeModeService } from './theme-mode.service';
 
@@ -50,7 +51,8 @@ import { ThemeModeService } from './theme-mode.service';
           </span>
         } @else {
           <button type="button" class="ah-signin" (click)="auth.login()">
-            <i class="pi pi-github"></i> Sign in
+            <i class="pi" [class.pi-user]="localAuth" [class.pi-github]="!localAuth"></i>
+            {{ localAuth ? 'Sign in locally' : 'Sign in with GitHub' }}
           </button>
         }
       </div>
@@ -166,6 +168,7 @@ import { ThemeModeService } from './theme-mode.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppHeader {
+  protected readonly localAuth = environment.localAuth;
   protected readonly auth = inject(AuthService);
   protected readonly mode = inject(ThemeModeService);
 }

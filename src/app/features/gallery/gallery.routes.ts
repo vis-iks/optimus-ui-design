@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { adminGuard } from './admin-guard';
+import { themeEditorRedirect } from './theme-editor-redirect';
 
 export const galleryRoutes: Routes = [
   {
@@ -9,6 +10,7 @@ export const galleryRoutes: Routes = [
   },
   {
     path: 'theme/:id',
+    canActivate: [themeEditorRedirect],
     loadComponent: () => import('./theme-detail').then((m) => m.ThemeDetail),
   },
   {

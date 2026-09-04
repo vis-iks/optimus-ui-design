@@ -3,14 +3,10 @@
 <main class="wrap">
   <div class="intro">
     <div class="intro-copy">
-      <h1>Optimus UI theme marketplace</h1>
-      <p>
-        Browse themes the community has published. Open any one in the designer to tweak it, or
-        build your own from scratch and publish it back.
-      </p>
+      <h1>Themes</h1>
     </div>
     <a routerLink="/designer" class="intro-cta">
-      Open the designer <i class="pi pi-arrow-right" aria-hidden="true"></i>
+      <i class="pi pi-plus" aria-hidden="true"></i> New theme
     </a>
   </div>
 
@@ -55,22 +51,45 @@
       <a routerLink="/designer" class="p-button p-button-sm">Create the first one</a>
     </div>
   } @else {
-    <div class="grid">
-      @for (theme of themes(); track theme.id) {
-        <app-theme-card [theme]="theme" (report)="openReport($event)" />
+    <div class="marketplace">
+      <section class="theme-browser" aria-label="Published themes">
+        <div class="theme-list">
+          @for (theme of themes(); track theme.id) {
+            <app-theme-card
+              [theme]="theme"
+              [selected]="theme.id === selectedTheme()?.id"
+              (select)="selectTheme($event)"
+            />
+          }
+        </div>
+        <p-paginator
+          [first]="first()"
+          [rows]="pageSize"
+          [totalRecords]="total()"
+          (onPageChange)="onPage($event)"
+        />
+      </section>
+
+      @if (selectedTheme(); as theme) {
+        <aside class="sample-panel" aria-labelledby="theme-sample-title">
+          <div class="sample-heading">
+            <div>
+              <h2 id="theme-sample-title">{{ theme.name }}</h2>
+            </div>
+            <span class="sample-foundation">{{ theme.base_preset }}</span>
+          </div>
+
+          <app-grid
+            class="sample-preview"
+            [style.--preview-font-family]="previewFontFamily()"
+            [style.--preview-font-size]="previewFontSize()"
+          />
+
+          <div class="sample-actions">
+            <a routerLink="/designer" [queryParams]="{ themeId: theme.id }">Edit theme</a>
+          </div>
+        </aside>
       }
     </div>
-    <p-paginator
-      [first]="first()"
-      [rows]="pageSize"
-      [totalRecords]="total()"
-      (onPageChange)="onPage($event)"
-    />
   }
 </main>
-
-<app-report-dialog
-  [theme]="reportTarget()"
-  [(visible)]="reportOpen"
-  (reported)="onReported()"
-/>

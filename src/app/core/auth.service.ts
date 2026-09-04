@@ -36,8 +36,15 @@ export class AuthService {
     }
   }
 
-  /** Redirect the browser to the backend GitHub OAuth entry point. */
-  login(returnUrl: string = location.pathname + location.search): void {
+  /** Start GitHub OAuth in production, or obtain a development-only local session. */
+  async login(returnUrl: string = location.pathname + location.search): Promise<void> {
+    if (environment.localAuth) {
+      const session = await firstValueFrom(
+        this.http.post<{ token: string }>(`${this.api}/api/auth/dev-login`, {}),
+      );
+      await this.completeLogin(session.token);
+      return;
+    }
     const redirect = encodeURIComponent(location.origin + returnUrl);
     location.href = `${this.api}/api/auth/github/login?redirect=${redirect}`;
   }

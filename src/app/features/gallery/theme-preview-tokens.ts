@@ -20,6 +20,13 @@ export interface ThemePreviewTokens {
   fieldBorder: string;
   radius: string;
   cardRadius: string;
+  tagRadius: string;
+  statusSuccessBackground: string;
+  statusSuccessColor: string;
+  statusWarnBackground: string;
+  statusWarnColor: string;
+  /** Unitless scale factor (relative to Aura's default table density) applied to the mini table's row padding. */
+  tableRowScale: number;
 }
 
 type Dict = Record<string, unknown>;
@@ -38,6 +45,12 @@ const LIGHT_DEFAULTS: ThemePreviewTokens = {
   fieldBorder: '#cbd5e1',
   radius: '6px',
   cardRadius: '8px',
+  tagRadius: '6px',
+  statusSuccessBackground: '#dcfce7',
+  statusSuccessColor: '#15803d',
+  statusWarnBackground: '#ffedd5',
+  statusWarnColor: '#c2410c',
+  tableRowScale: 1,
 };
 
 const DARK_DEFAULTS: ThemePreviewTokens = {
@@ -53,6 +66,12 @@ const DARK_DEFAULTS: ThemePreviewTokens = {
   fieldBorder: '#334155',
   radius: '6px',
   cardRadius: '8px',
+  tagRadius: '6px',
+  statusSuccessBackground: 'color-mix(in srgb, #22c55e 16%, transparent)',
+  statusSuccessColor: '#4ade80',
+  statusWarnBackground: 'color-mix(in srgb, #f97316 16%, transparent)',
+  statusWarnColor: '#fb923c',
+  tableRowScale: 1,
 };
 
 function isPlainObject(value: unknown): value is Dict {
@@ -175,6 +194,29 @@ export function resolveThemePreview(
   const pick = (value: string | undefined, fallback: string): string =>
     value && value.length > 0 ? value : fallback;
 
+  const tagScheme = (((merged['components'] as Dict | undefined)?.['tag'] as Dict | undefined)?.[
+    'colorScheme'
+  ] as Dict | undefined)?.[scheme] as Dict | undefined;
+  const fromTag = (severity: 'success' | 'warn', sub: 'background' | 'color'): string | undefined =>
+    resolveValue((tagScheme?.[severity] as Dict | undefined)?.[sub], merged, scheme);
+
+  // Aura's own default body-cell padding — the reference point a theme's density is scaled against.
+  const AURA_DEFAULT_ROW_PADDING_REM = 0.75;
+  const rowPaddingRem = (() => {
+    const padding = (
+      ((merged['components'] as Dict | undefined)?.['datatable'] as Dict | undefined)?.[
+        'bodyCell'
+      ] as Dict | undefined
+    )?.['padding'];
+    const resolved = resolveValue(padding, merged, scheme);
+    const match = resolved?.match(/^(-?[\d.]+)rem/);
+    return match ? parseFloat(match[1]) : undefined;
+  })();
+  const tableRowScale =
+    rowPaddingRem !== undefined
+      ? Math.min(1.6, Math.max(0.45, rowPaddingRem / AURA_DEFAULT_ROW_PADDING_REM))
+      : defaults.tableRowScale;
+
   return {
     primary: pick(fromScheme('primary.color'), defaults.primary),
     primaryContrast: pick(fromScheme('primary.contrastColor'), defaults.primaryContrast),
@@ -200,5 +242,14 @@ export function resolveThemePreview(
       resolveValue(walk(merged['primitive'], ['borderRadius', 'lg']), merged, scheme),
       defaults.cardRadius,
     ),
+    tagRadius: pick(
+      resolveValue(walk(semantic, ['content', 'borderRadius']), merged, scheme),
+      defaults.tagRadius,
+    ),
+    statusSuccessBackground: pick(fromTag('success', 'background'), defaults.statusSuccessBackground),
+    statusSuccessColor: pick(fromTag('success', 'color'), defaults.statusSuccessColor),
+    statusWarnBackground: pick(fromTag('warn', 'background'), defaults.statusWarnBackground),
+    statusWarnColor: pick(fromTag('warn', 'color'), defaults.statusWarnColor),
+    tableRowScale,
   };
 }
