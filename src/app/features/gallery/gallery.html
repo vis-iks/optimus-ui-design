@@ -87,6 +87,9 @@
 
           <div class="sample-actions">
             <a routerLink="/designer" [queryParams]="{ themeId: theme.id }">Edit theme</a>
+            <button type="button" class="download-link" (click)="downloadTheme(theme)">
+              <i class="pi pi-download" aria-hidden="true"></i> Download theme
+            </button>
           </div>
         </aside>
       }

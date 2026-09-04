@@ -10,6 +10,7 @@ import { ProgressSpinner } from '@openng/optimus-ui/progressspinner';
 import { Select } from '@openng/optimus-ui/select';
 
 import { AppHeader } from '../../core/app-header';
+import { downloadThemePreset } from '../../core/download-theme-preset';
 import { MarketplaceService } from '../../core/marketplace.service';
 import { BasePreset, MarketplaceTheme } from '../../core/marketplace.models';
 import { Grid } from '../designer/blocks/grid/grid';
@@ -130,6 +131,10 @@ export class Gallery implements OnInit {
   protected selectTheme(theme: MarketplaceTheme): void {
     this.selectedTheme.set(theme);
     this.previewTheme(theme);
+  }
+
+  protected downloadTheme(theme: MarketplaceTheme): void {
+    downloadThemePreset(theme.name, theme.preset);
   }
 
   private previewTheme(theme: MarketplaceTheme): void {

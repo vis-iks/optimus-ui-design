@@ -7,6 +7,7 @@ import { forkJoin } from 'rxjs';
 
 import { AppHeader } from '../../core/app-header';
 import { AuthService } from '../../core/auth.service';
+import { downloadThemePreset } from '../../core/download-theme-preset';
 import { MarketplaceService } from '../../core/marketplace.service';
 import { MarketplaceTheme, ThemeFamily, ThemeSummary } from '../../core/marketplace.models';
 import { ReportDialog } from './report-dialog';
@@ -70,6 +71,14 @@ interface TreeRow {
               <a class="btn btn--primary" routerLink="/designer" [queryParams]="{ themeId: t.id }">
                 <i class="pi pi-clone"></i> Fork &amp; edit
               </a>
+              <p-button
+                label="Download"
+                icon="pi pi-download"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
+                (click)="onDownload(t)"
+              />
               <p-button
                 label="Report"
                 icon="pi pi-flag"
@@ -316,6 +325,10 @@ export class ThemeDetail implements OnInit {
         },
       });
     });
+  }
+
+  protected onDownload(theme: MarketplaceTheme): void {
+    downloadThemePreset(theme.name, theme.preset);
   }
 
   protected onReport(theme: MarketplaceTheme): void {

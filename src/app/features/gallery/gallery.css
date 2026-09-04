@@ -123,14 +123,24 @@
   border-top: 1px solid var(--p-content-border-color, #e5e7eb);
 }
 
-.sample-actions a {
+.sample-actions a,
+.sample-actions .download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  padding: 0;
+  background: none;
   color: var(--p-primary-color, #6366f1);
+  font: inherit;
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
 }
 
-.sample-actions a:hover {
+.sample-actions a:hover,
+.sample-actions .download-link:hover {
   text-decoration: underline;
 }
 
